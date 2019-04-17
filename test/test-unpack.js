@@ -2,42 +2,49 @@
 
 const fs = require('fs');
 const path = require('path');
+const { promisify } = require('util');
 
 const test = require('tap').test;
 
 const tempDirectory = require('../lib/temp-directory');
 const unpack = require('../lib/unpack');
 
-test('unpack: context.unpack = null', (t) => {
+const fsStat = promisify(fs.stat);
+
+test('unpack: context.unpack = null', async (t) => {
   const context = {
     unpack: null,
     emit: function() {}
   };
 
-  unpack(context, (err) => {
+  try {
+    unpack(context);
+  } catch (err) {
     t.deepEquals(
       err,
       new Error('Nothing to unpack... Ending'),
       'it should error out'
     );
     t.end();
-  });
+  }
 });
 
-test('unpack: context.unpack is invalid path', (t) => {
+test('unpack: context.unpack is invalid path', async (t) => {
   const context = {
     unpack: path.join(__dirname, '..', 'fixtures', 'do-not-exist.tar.gz'),
     emit: function() {}
   };
 
-  unpack(context, (err) => {
+  try {
+    unpack(context);
+  } catch (err) {
     t.deepEquals(
       err,
       new Error('Nothing to unpack... Ending'),
       'it should error out'
     );
     t.end();
-  });
+  }
 });
 
 test('unpack: valid unpack', async (t) => {
@@ -54,26 +61,19 @@ test('unpack: valid unpack', async (t) => {
 
   await tempDirectory.create(context);
 
-  unpack(context, (err) => {
-    t.error(err);
-    fs.stat(path.join(context.path, 'omg-i-pass'), (erro, stats) => {
-      t.error(erro);
-      t.ok(stats.isDirectory(), 'the untarred result should be a directory');
-      tempDirectory
-        .remove(context)
-        .then(() => t.end(), (error) => t.error(error));
-    });
-  });
+  await unpack(context);
+  const stats = await fs.stat(path.join(context.path, 'omg-i-pass'));
+  t.ok(stats.isDirectory(), 'the untarred result should be a directory');
+  await tempDirectory.remove(context);
+  t.end();
 });
 
-test('unpack: context.unpack = false', (t) => {
+test('unpack: context.unpack = false', async (t) => {
   const context = {
     unpack: false,
     emit: function() {}
   };
 
-  unpack(context, (err) => {
-    t.error(err);
-    t.end();
-  });
+  await unpack(context);
+  t.end();
 });
