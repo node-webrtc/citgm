@@ -44,32 +44,32 @@ test('yarn-install: setup', async (t) => {
   });
 });
 
-test('yarn-install: basic module', (t) => {
+test('yarn-install: basic module', async (t) => {
   const context = makeContext.npmContext(
     'omg-i-pass',
     packageManagers,
     sandbox
   );
-  packageManagerInstall('yarn', context, (err) => {
-    t.error(err);
-    t.end();
-  });
+  await packageManagerInstall('yarn', context);
+  t.end();
 });
 
-test('yarn-install: no package.json', (t) => {
+test('yarn-install: no package.json', async (t) => {
   const context = makeContext.npmContext(
     'omg-i-fail',
     packageManagers,
     sandbox
   );
-  packageManagerInstall('yarn', context, (err) => {
+  try {
+    await packageManagerInstall('yarn', context);
+  } catch (err) {
     t.equals(err && err.message, 'Install Failed');
     t.notOk(context.module.flaky, 'Module failed but is not flaky');
     t.end();
-  });
+  }
 });
 
-test('yarn-install: timeout', (t) => {
+test('yarn-install: timeout', async (t) => {
   const context = makeContext.npmContext(
     'omg-i-pass',
     packageManagers,
@@ -78,14 +78,16 @@ test('yarn-install: timeout', (t) => {
       timeoutLength: 100
     }
   );
-  packageManagerInstall('yarn', context, (err) => {
+  try {
+    await packageManagerInstall('yarn', context);
+  } catch (err) {
     t.ok(context.module.flaky, 'Module is Flaky because install timed out');
     t.equals(err && err.message, 'Install Timed Out');
     t.end();
-  });
+  }
 });
 
-test('yarn-install: failed install', (t) => {
+test('yarn-install: failed install', async (t) => {
   const context = makeContext.npmContext(
     'omg-bad-tree',
     packageManagers,
@@ -94,12 +96,14 @@ test('yarn-install: failed install', (t) => {
   const expected = {
     testError: /\/THIS-WILL-FAIL: Not found/
   };
-  packageManagerInstall('yarn', context, (err) => {
+  try {
+    await packageManagerInstall('yarn', context);
+  } catch (err) {
     t.notOk(context.module.flaky, 'Module failed is not flaky');
     t.equals(err && err.message, 'Install Failed');
     t.match(context, expected, 'Install error reported');
     t.end();
-  });
+  }
 });
 
 test('yarn-install: teardown', (t) => {

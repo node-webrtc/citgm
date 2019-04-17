@@ -65,55 +65,59 @@ test('yarn-test: setup', async (t) => {
   });
 });
 
-test('yarn-test: basic module passing', (t) => {
+test('yarn-test: basic module passing', async (t) => {
   const context = makeContext.npmContext(
     'omg-i-pass',
     packageManagers,
     sandbox
   );
-  packageManagerTest('yarn', context, (err) => {
-    t.error(err);
-    t.end();
-  });
+  await packageManagerTest('yarn', context);
+  t.end();
 });
 
-test('yarn-test: basic module failing', (t) => {
+test('yarn-test: basic module failing', async (t) => {
   const context = makeContext.npmContext(
     'omg-i-fail',
     packageManagers,
     sandbox
   );
-  packageManagerTest('yarn', context, (err) => {
+  try {
+    await packageManagerTest('yarn', context);
+  } catch (err) {
     t.equals(err && err.message, 'The canary is dead:');
     t.end();
-  });
+  }
 });
 
-test('yarn-test: basic module no test script', (t) => {
+test('yarn-test: basic module no test script', async (t) => {
   const context = makeContext.npmContext(
     'omg-i-do-not-support-testing',
     packageManagers,
     sandbox
   );
-  packageManagerTest('yarn', context, (err) => {
+  try {
+    await packageManagerTest('yarn', context);
+  } catch (err) {
     t.equals(err && err.message, 'Module does not support yarn-test!');
     t.end();
-  });
+  }
 });
 
-test('yarn-test: no package.json', (t) => {
+test('yarn-test: no package.json', async (t) => {
   const context = makeContext.npmContext(
     'omg-i-dont-exist',
     packageManagers,
     sandbox
   );
-  packageManagerTest('yarn', context, (err) => {
+  try {
+    await packageManagerTest('yarn', context);
+  } catch (err) {
     t.equals(err && err.message, 'Package.json Could not be found');
     t.end();
-  });
+  }
 });
 
-test('yarn-test: alternative test-path', (t) => {
+test('yarn-test: alternative test-path', async (t) => {
   // Same test as 'basic module passing', except with alt node bin which fails.
   const context = makeContext.npmContext(
     'omg-i-pass',
@@ -123,13 +127,15 @@ test('yarn-test: alternative test-path', (t) => {
       testPath: path.resolve(__dirname, '..', 'fixtures', 'fakenodebin')
     }
   );
-  packageManagerTest('yarn', context, (err) => {
+  try {
+    await packageManagerTest('yarn', context);
+  } catch (err) {
     t.equals(err && err.message, 'The canary is dead:');
     t.end();
-  });
+  }
 });
 
-test('yarn-test: timeout', (t) => {
+test('yarn-test: timeout', async (t) => {
   const context = makeContext.npmContext(
     'omg-i-pass',
     packageManagers,
@@ -138,14 +144,16 @@ test('yarn-test: timeout', (t) => {
       timeoutLength: 100
     }
   );
-  packageManagerTest('yarn', context, (err) => {
+  try {
+    await packageManagerTest('yarn', context);
+  } catch (err) {
     t.ok(context.module.flaky, 'Module is Flaky because tests timed out');
     t.equals(err && err.message, 'Test Timed Out');
     t.end();
-  });
+  }
 });
 
-test('yarn-test: module with scripts passing', (t) => {
+test('yarn-test: module with scripts passing', async (t) => {
   const context = makeContext.npmContext(
     {
       name: 'omg-i-pass-with-scripts',
@@ -157,13 +165,12 @@ test('yarn-test: module with scripts passing', (t) => {
       npmLevel: 'silly'
     }
   );
-  packageManagerTest('yarn', context, (err) => {
-    t.error(err);
-    t.end();
-  });
+
+  await packageManagerTest('yarn', context);
+  t.end();
 });
 
-test('yarn-test: tmpdir is redirected', (t) => {
+test('yarn-test: tmpdir is redirected', async (t) => {
   const context = makeContext.npmContext(
     'omg-i-write-to-tmpdir',
     packageManagers,
@@ -173,16 +180,11 @@ test('yarn-test: tmpdir is redirected', (t) => {
     }
   );
   context.npmConfigTmp = writeTmpdirTemp;
-  packageManagerTest('npm', context, (err) => {
-    t.error(err);
-    t.ok(
-      fs.existsSync(
-        path.join(writeTmpdirTemp, 'omg-i-write-to-tmpdir-testfile')
-      ),
-      'Temporary file is written into the redirected temporary directory'
-    );
-    t.end();
-  });
+  await packageManagerTest('yarn', context);
+  t.ok(
+    fs.existsSync(path.join(writeTmpdirTemp, 'omg-i-write-to-tmpdir-testfile')),
+    'Temporary file is written into the redirected temporary directory'
+  );
 });
 
 test('yarn-test: teardown', (t) => {
