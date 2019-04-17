@@ -128,14 +128,12 @@ test('lookup: module not in table', (t) => {
     emit: function() {}
   };
 
-  lookup(context, (err) => {
-    t.error(err);
-    t.notOk(
-      context.module.raw,
-      'raw should remain falsey if module is not in lookup'
-    );
-    t.end();
-  });
+  lookup(context);
+  t.notOk(
+    context.module.raw,
+    'raw should remain falsey if module is not in lookup'
+  );
+  t.end();
 });
 
 test('lookup: module not in table with gitHead', (t) => {
@@ -155,15 +153,13 @@ test('lookup: module not in table with gitHead', (t) => {
     emit: function() {}
   };
 
-  lookup(context, (err) => {
-    t.error(err);
-    t.equals(
-      context.module.raw,
-      'https://github.com/nodejs/omg-i-pass/archive/abc123.tar.gz',
-      'raw should use commit SHA if package has gitHead'
-    );
-    t.end();
-  });
+  lookup(context);
+  t.equals(
+    context.module.raw,
+    'https://github.com/nodejs/omg-i-pass/archive/abc123.tar.gz',
+    'raw should use commit SHA if package has gitHead'
+  );
+  t.end();
 });
 
 test('lookup: module in table', (t) => {
@@ -182,15 +178,13 @@ test('lookup: module in table', (t) => {
     emit: function() {}
   };
 
-  lookup(context, (err) => {
-    t.error(err);
-    t.equals(
-      context.module.raw,
-      'https://github.com/lodash/lodash/archive/master.tar.gz',
-      'raw should be truthy if the module was in the list'
-    );
-    t.end();
-  });
+  lookup(context);
+  t.equals(
+    context.module.raw,
+    'https://github.com/lodash/lodash/archive/master.tar.gz',
+    'raw should be truthy if the module was in the list'
+  );
+  t.end();
 });
 
 test('lookup: module in table with gitHead', (t) => {
@@ -210,15 +204,13 @@ test('lookup: module in table with gitHead', (t) => {
     emit: function() {}
   };
 
-  lookup(context, (err) => {
-    t.error(err);
-    t.equals(
-      context.module.raw,
-      'https://github.com/lodash/lodash/archive/abc123.tar.gz',
-      'raw should use commit SHA if package has gitHead'
-    );
-    t.end();
-  });
+  lookup(context);
+  t.equals(
+    context.module.raw,
+    'https://github.com/lodash/lodash/archive/abc123.tar.gz',
+    'raw should use commit SHA if package has gitHead'
+  );
+  t.end();
 });
 
 test('lookup: module in table with scripts', (t) => {
@@ -239,15 +231,13 @@ test('lookup: module in table with scripts', (t) => {
     emit: function() {}
   };
 
-  lookup(context, (err) => {
-    t.error(err);
-    t.strictSame(
-      context.module.scripts,
-      ['test-build', 'test'],
-      'lookup should read scripts'
-    );
-    t.end();
-  });
+  lookup(context);
+  t.strictSame(
+    context.module.scripts,
+    ['test-build', 'test'],
+    'lookup should read scripts'
+  );
+  t.end();
 });
 
 test('lookup: module in table with useGitClone', (t) => {
@@ -270,16 +260,14 @@ test('lookup: module in table with useGitClone', (t) => {
     emit: function() {}
   };
 
-  lookup(context, (err) => {
-    t.error(err);
-    t.equals(
-      context.module.raw,
-      'https://github.com/lodash/lodash.git',
-      'raw should be a git URL if useGitClone is true'
-    );
-    t.equals(context.module.ref, 'v1.2.3');
-    t.end();
-  });
+  lookup(context);
+  t.equals(
+    context.module.raw,
+    'https://github.com/lodash/lodash.git',
+    'raw should be a git URL if useGitClone is true'
+  );
+  t.equals(context.module.ref, 'v1.2.3');
+  t.end();
 });
 
 test('lookup: no table', (t) => {
@@ -289,10 +277,12 @@ test('lookup: no table', (t) => {
     }
   };
 
-  lookup(context, (err) => {
+  try {
+    lookup(context);
+  } catch (err) {
     t.equals(err && err.message, 'Lookup table could not be loaded');
     t.end();
-  });
+  }
 });
 
 test('lookup: replace with no repo', (t) => {
@@ -311,10 +301,12 @@ test('lookup: replace with no repo', (t) => {
     emit: function() {}
   };
 
-  lookup(context, (err) => {
+  try {
+    lookup(context);
+  } catch (err) {
     t.equals(err && err.message, 'no-repository-field in package.json');
     t.end();
-  });
+  }
 });
 
 test('lookup: --fail-flaky', (t) => {
@@ -335,11 +327,9 @@ test('lookup: --fail-flaky', (t) => {
     emit: function() {}
   };
 
-  lookup(context, (err) => {
-    t.error(err);
-    t.false(context.module.flaky, 'flaky should be disabled');
-    t.end();
-  });
+  lookup(context);
+  t.false(context.module.flaky, 'flaky should be disabled');
+  t.end();
 });
 
 test('lookup: ensure lookup works', (t) => {
@@ -381,11 +371,9 @@ test('lookup: lookup with install', (t) => {
     install: [/--extra-param/]
   };
 
-  lookup(context, (err) => {
-    t.error(err);
-    t.match(context.module, expected, 'Read extra install parameter');
-    t.end();
-  });
+  lookup(context);
+  t.match(context.module, expected, 'Read extra install parameter');
+  t.end();
 });
 
 test('lookup: logging', (t) => {
@@ -419,9 +407,7 @@ test('lookup: logging', (t) => {
   context.on('data', (type, key, msg) => {
     log.push({ type: type, key: key, msg: msg });
   });
-  lookup(context, () => {
-    t.plan(1);
-    t.strictSame(log, expectedLogMsgs);
-    t.end();
-  });
+  lookup(context);
+  t.strictSame(log, expectedLogMsgs);
+  t.end();
 });

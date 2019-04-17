@@ -6,7 +6,7 @@ const test = require('tap').test;
 
 const grabModuleData = require('../lib/grab-module-data');
 
-test('grab-module-data: lodash', (t) => {
+test('grab-module-data: lodash', async (t) => {
   const context = {
     path: __dirname,
     module: {
@@ -20,22 +20,20 @@ test('grab-module-data: lodash', (t) => {
     options: {}
   };
 
-  grabModuleData(context, (err, result) => {
-    t.error(err);
-    t.ok(result.meta, 'There should be a result.meta');
-    t.equals(
-      result.meta.name,
-      'lodash',
-      'The name of the results should be lodash'
-    );
-    t.ok(result.meta.dist, 'It should have a dist object');
-    t.ok(result.meta.dist.shasum, 'The dist should have a shasum');
-    t.ok(result.meta.dist.tarball, 'The dist should have a tarball');
-    t.end();
-  });
+  await grabModuleData(context);
+  t.ok(context.meta, 'There should be a context.meta');
+  t.equals(
+    context.meta.name,
+    'lodash',
+    'The name of the results should be lodash'
+  );
+  t.ok(context.meta.dist, 'It should have a dist object');
+  t.ok(context.meta.dist.shasum, 'The dist should have a shasum');
+  t.ok(context.meta.dist.tarball, 'The dist should have a tarball');
+  t.end();
 });
 
-test('grab-module-data: does not exist', (t) => {
+test('grab-module-data: does not exist', async (t) => {
   const context = {
     path: __dirname,
     module: {
@@ -49,14 +47,12 @@ test('grab-module-data: does not exist', (t) => {
     options: {}
   };
 
-  grabModuleData(context, (err, result) => {
-    t.error(err);
-    t.notOk(result.meta, 'There should not be a result.meta');
-    t.end();
-  });
+  await grabModuleData(context);
+  t.notOk(context.meta, 'There should not be a context.meta');
+  t.end();
 });
 
-test('grab-module-data: hosted', (t) => {
+test('grab-module-data: hosted', async (t) => {
   const context = {
     path: __dirname,
     module: {
@@ -78,14 +74,12 @@ test('grab-module-data: hosted', (t) => {
     }
   };
 
-  grabModuleData(context, (err, result) => {
-    t.error(err);
-    t.deepequals(
-      result.meta,
-      expected,
-      'The returned meta object should' +
-        ' include a type of git and the supplied url'
-    );
-    t.end();
-  });
+  await grabModuleData(context);
+  t.deepequals(
+    context.meta,
+    expected,
+    'The returned meta object should' +
+      ' include a type of git and the supplied url'
+  );
+  t.end();
 });

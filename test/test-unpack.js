@@ -40,7 +40,7 @@ test('unpack: context.unpack is invalid path', (t) => {
   });
 });
 
-test('unpack: valid unpack', (t) => {
+test('unpack: valid unpack', async (t) => {
   const context = {
     module: {
       name: 'omg-i-pass'
@@ -52,18 +52,16 @@ test('unpack: valid unpack', (t) => {
   // FIXME I am not super convinced that the correct tar ball is being deflated
   // FIXME There is a possibility that the npm cache is trumping this
 
-  tempDirectory.create(context, (e) => {
-    t.error(e);
-    unpack(context, (err) => {
-      t.error(err);
-      fs.stat(path.join(context.path, 'omg-i-pass'), (erro, stats) => {
-        t.error(erro);
-        t.ok(stats.isDirectory(), 'the untarred result should be a directory');
-        tempDirectory.remove(context, (error) => {
-          t.error(error);
-          t.end();
-        });
-      });
+  await tempDirectory.create(context);
+
+  unpack(context, (err) => {
+    t.error(err);
+    fs.stat(path.join(context.path, 'omg-i-pass'), (erro, stats) => {
+      t.error(erro);
+      t.ok(stats.isDirectory(), 'the untarred result should be a directory');
+      tempDirectory
+        .remove(context)
+        .then(() => t.end(), (error) => t.error(error));
     });
   });
 });

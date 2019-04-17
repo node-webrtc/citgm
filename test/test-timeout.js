@@ -11,12 +11,9 @@ const sandbox = path.join(os.tmpdir(), `citgm-${Date.now()}`);
 
 let packageManagers;
 
-test('timeout: setup', (t) => {
+test('timeout: setup', async (t) => {
   t.plan(1);
-  packageManager.getPackageManagers((e, res) => {
-    packageManagers = res;
-    t.error(e);
-  });
+  packageManagers = await packageManager.getPackageManagers();
 });
 
 test('timeout:', (t) => {

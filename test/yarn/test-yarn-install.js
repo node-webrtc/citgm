@@ -24,12 +24,9 @@ const badTemp = path.join(sandbox, 'omg-bad-tree');
 
 let packageManagers;
 
-test('yarn-install: setup', (t) => {
+test('yarn-install: setup', async (t) => {
   t.plan(8);
-  packageManager.getPackageManagers((e, res) => {
-    packageManagers = res;
-    t.error(e);
-  });
+  packageManagers = await packageManager.getPackageManagers();
   mkdirp(sandbox, (err) => {
     t.error(err);
     ncp(moduleFixtures, moduleTemp, (e) => {

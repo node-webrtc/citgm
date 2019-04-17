@@ -33,12 +33,9 @@ const writeTmpdirTemp = path.join(sandbox, 'omg-i-write-to-tmpdir');
 
 let packageManagers;
 
-test('yarn-test: setup', (t) => {
+test('yarn-test: setup', async (t) => {
   t.plan(16);
-  packageManager.getPackageManagers((e, res) => {
-    packageManagers = res;
-    t.error(e);
-  });
+  packageManagers = await packageManager.getPackageManagers();
   mkdirp(sandbox, (err) => {
     t.error(err);
     ncp(passFixtures, passTemp, (e) => {
