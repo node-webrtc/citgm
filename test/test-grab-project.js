@@ -23,7 +23,7 @@ test('grab-project: setup', (t) => {
   });
 });
 
-test('grab-project: npm module', (t) => {
+test('grab-project: npm module', async (t) => {
   const context = {
     emit: function() {},
     path: sandbox,
@@ -33,17 +33,15 @@ test('grab-project: npm module', (t) => {
     meta: {},
     options: {}
   };
-  grabProject(context, (err) => {
+  await grabProject(context);
+  fs.stat(context.unpack, (err, stats) => {
     t.error(err);
-    fs.stat(context.unpack, (err, stats) => {
-      t.error(err);
-      t.ok(stats.isFile(), 'The tar ball should exist on the system');
-      t.end();
-    });
+    t.ok(stats.isFile(), 'The tar ball should exist on the system');
+    t.end();
   });
 });
 
-test('grab-project: local', (t) => {
+test('grab-project: local', async (t) => {
   const context = {
     emit: function() {},
     path: sandbox,
@@ -54,17 +52,15 @@ test('grab-project: local', (t) => {
     meta: {},
     options: {}
   };
-  grabProject(context, (err) => {
+  await grabProject(context);
+  fs.stat(context.unpack, (err, stats) => {
     t.error(err);
-    fs.stat(context.unpack, (err, stats) => {
-      t.error(err);
-      t.ok(stats.isFile(), 'The tar ball should exist on the system');
-      t.end();
-    });
+    t.ok(stats.isFile(), 'The tar ball should exist on the system');
+    t.end();
   });
 });
 
-test('grab-project: lookup table', (t) => {
+test('grab-project: lookup table', async (t) => {
   const context = {
     emit: function() {},
     path: sandbox,
@@ -74,17 +70,15 @@ test('grab-project: lookup table', (t) => {
     meta: {},
     options: {}
   };
-  grabProject(context, (err) => {
+  await grabProject(context);
+  fs.stat(context.unpack, (err, stats) => {
     t.error(err);
-    fs.stat(context.unpack, (err, stats) => {
-      t.error(err);
-      t.ok(stats.isFile(), 'The tar ball should exist on the system');
-      t.end();
-    });
+    t.ok(stats.isFile(), 'The tar ball should exist on the system');
+    t.end();
   });
 });
 
-test('grab-project: local', (t) => {
+test('grab-project: local', async (t) => {
   const context = {
     emit: function() {},
     path: sandbox,
@@ -95,18 +89,16 @@ test('grab-project: local', (t) => {
     options: {}
   };
   process.chdir(fixtures);
-  grabProject(context, (err) => {
+  await grabProject(context);
+  fs.stat(context.unpack, (err, stats) => {
     t.error(err);
-    fs.stat(context.unpack, (err, stats) => {
-      t.error(err);
-      t.ok(stats.isFile(), 'The tar ball should exist on the system');
-      process.chdir(__dirname);
-      t.end();
-    });
+    t.ok(stats.isFile(), 'The tar ball should exist on the system');
+    process.chdir(__dirname);
+    t.end();
   });
 });
 
-test('grab-project: module does not exist', (t) => {
+test('grab-project: module does not exist', async (t) => {
   const context = {
     emit: function() {},
     path: sandbox,
@@ -115,13 +107,15 @@ test('grab-project: module does not exist', (t) => {
     },
     options: {}
   };
-  grabProject(context, (err) => {
+  try {
+    await grabProject(context);
+  } catch (err) {
     t.equals(err && err.message, 'Failure getting project from npm');
     t.end();
-  });
+  }
 });
 
-test('grab-project: use git clone', (t) => {
+test('grab-project: use git clone', async (t) => {
   const context = {
     emit: function() {},
     path: path.join(sandbox, 'git-clone'),
@@ -133,20 +127,15 @@ test('grab-project: use git clone', (t) => {
     },
     options: {}
   };
-  grabProject(context, (err) => {
+  await grabProject(context);
+  fs.stat(path.join(context.path, 'omg-i-pass/package.json'), (err, stats) => {
     t.error(err);
-    fs.stat(
-      path.join(context.path, 'omg-i-pass/package.json'),
-      (err, stats) => {
-        t.error(err);
-        t.ok(stats.isFile(), 'The project must be cloned locally');
-        t.end();
-      }
-    );
+    t.ok(stats.isFile(), 'The project must be cloned locally');
+    t.end();
   });
 });
 
-test('grab-project: fail with bad ref', (t) => {
+test('grab-project: fail with bad ref', async (t) => {
   const context = {
     emit: function() {},
     path: path.join(sandbox, 'git-bad-ref'),
@@ -158,16 +147,18 @@ test('grab-project: fail with bad ref', (t) => {
     },
     options: {}
   };
-  grabProject(context, (err) => {
+  try {
+    await grabProject(context);
+  } catch (err) {
     t.equals(
       err && err.message,
       'Command failed: git fetch --depth=1 origin bad-git-ref'
     );
     t.end();
-  });
+  }
 });
 
-test('grab-project: timeout', (t) => {
+test('grab-project: timeout', async (t) => {
   const context = {
     emit: function() {},
     path: sandbox,
@@ -180,10 +171,12 @@ test('grab-project: timeout', (t) => {
       timeoutLength: 10
     }
   };
-  grabProject(context, (err) => {
+  try {
+    await grabProject(context);
+  } catch (err) {
     t.equals(err && err.message, 'Download Timed Out');
     t.end();
-  });
+  }
 });
 
 test('grab-project: teardown', (t) => {
